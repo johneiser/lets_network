@@ -88,8 +88,9 @@ class HttpTestCase(TestCase):
         Test that required images work on the given architecture.
         """
         output = b""
-        with Container.run("dperson/torproxy:latest",
-            command="-h") as container:
+        image = "dperson/torproxy:latest"
+        with Container.run(image, command="-h") as container:
             output = container.output()
 
-        self.assertRegex(output, b"Usage: ", "Container failed for architecture: %s" % platform.machine())
+        self.assertRegex(output, b"Usage: ",
+            "Image (%s) failed for architecture: %s" % (image, platform.machine()))

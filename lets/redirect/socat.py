@@ -36,8 +36,9 @@ class SocatTestCase(TestCase):
         import platform
 
         output = b""
-        with Container.run("local/socat",
-            command="-h") as container:
+        image = "local/socat"
+        with Container.run(image, command="-h") as container:
             output = container.output()
 
-        self.assertRegex(output, b"Usage:", "Container failed for architecture: %s" % platform.machine())
+        self.assertRegex(output, b"Usage:",
+            "Image (%s) failed for architecture: %s" % (image, platform.machine()))

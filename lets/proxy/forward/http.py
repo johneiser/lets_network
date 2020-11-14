@@ -64,8 +64,9 @@ class HttpTestCase(TestCase):
         Test that required images work on the given architecture.
         """
         output = b""
-        with Container.run("mitmproxy/mitmproxy:%s" % ("5.0.1-ARMv7" if arm else "5.0.1"),
-            command="mitmproxy -h") as container:
+        image = "mitmproxy/mitmproxy:%s" % ("5.0.1-ARMv7" if arm else "5.0.1") 
+        with Container.run(image, command="mitmproxy -h") as container:
             output = container.output()
 
-        self.assertRegex(output, b"usage: mitmproxy", "Container failed for architecture: %s" % platform.machine())
+        self.assertRegex(output, b"usage: mitmproxy",
+            "Image (%s) failed for architecture: %s" % (image, platform.machine()))

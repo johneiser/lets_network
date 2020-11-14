@@ -67,8 +67,9 @@ class HttpTestCase(TestCase):
         Test that required images work on the given architecture.
         """
         output = b""
-        with Container.run("wernight/ngrok:%s" % ("armhf" if arm else "latest"),
-            command="ngrok help") as container:
+        image = "wernight/ngrok:%s" % ("armhf" if arm else "latest")
+        with Container.run(image, command="ngrok help") as container:
             output = container.output()
 
-        self.assertRegex(output, b"inconshreveable", "Container failed for architecture: %s" % platform.machine())
+        self.assertRegex(output, b"inconshreveable",
+            "Image (%s) failed for architecture: %s" % (image, platform.machine()))
