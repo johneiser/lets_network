@@ -1,4 +1,4 @@
-from lets.__module__ import Module, Mount, Container
+from lets.__module__ import Module, Mount, Container, TestCase
 import argparse
 
 
@@ -25,3 +25,19 @@ class Socat(Module):
             command=command) as container:
 
             container.interact()
+
+class SocatTestCase(TestCase):
+    images = ["local/socat"]
+
+    def test_images(self):
+        """
+        Test that required images work on the given architecture.
+        """
+        import platform
+
+        output = b""
+        with Container.run("local/socat",
+            command="-h") as container:
+            output = container.output()
+
+        self.assertRegex(output, b"Usage:", "Container failed for architecture: %s" % platform.machine())

@@ -1,4 +1,4 @@
-from lets.__module__ import Module, Mount, Container
+from lets.__module__ import Module, Mount, Container, TestCase
 
 # Determine architecture
 import platform
@@ -57,3 +57,17 @@ class HTTP(Module):
                 ) as container:
 
                 container.interact()
+
+class HttpTestCase(TestCase):
+    images = ["wernight/ngrok:%s" % ("armhf" if arm else "latest")]
+
+    def test_images(self):
+        """
+        Test that required images work on the given architecture.
+        """
+        output = b""
+        with Container.run("wernight/ngrok:%s" % ("armhf" if arm else "latest"),
+            command="ngrok help") as container:
+            output = container.output()
+
+        self.assertRegex(output, b"inconshreveable", "Container failed for architecture: %s" % platform.machine())

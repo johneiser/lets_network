@@ -1,4 +1,4 @@
-from lets.__module__ import Module, Mount, Container
+from lets.__module__ import Module, Mount, Container, TestCase
 import argparse
 
 # Determine architecture
@@ -78,3 +78,17 @@ class HTTP(Module):
 
                     self.log.info("Proxy server listening at http://%s:%i", interface, port)
                     proxy.interact() if mitm else proxy.wait()
+
+class HttpTestCase(TestCase):
+    images = ["dperson/torproxy:latest"]
+
+    def test_images(self):
+        """
+        Test that required images work on the given architecture.
+        """
+        output = b""
+        with Container.run("dperson/torproxy:latest",
+            command="-h") as container:
+            output = container.output()
+
+        self.assertRegex(output, b"Usage: ", "Container failed for architecture: %s" % platform.machine())

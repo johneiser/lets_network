@@ -1,4 +1,4 @@
-from lets.__module__ import Module, Mount, Container
+from lets.__module__ import Module, Mount, Container, TestCase
 import argparse
 
 # Determine architecture
@@ -54,3 +54,17 @@ class Http(Module):
 
                 self.log.info("Proxy server listening at http://%s:%i", interface, port)
                 container.interact() if mitm else container.wait()
+
+class HttpTestCase(TestCase):
+    images = ["mitmproxy/mitmproxy:%s" % ("5.0.1-ARMv7" if arm else "5.0.1")]
+
+    def test_images(self):
+        """
+        Test that required images work on the given architecture.
+        """
+        output = b""
+        with Container.run("mitmproxy/mitmproxy:%s" % ("5.0.1-ARMv7" if arm else "5.0.1"),
+            command="mitmproxy -h") as container:
+            output = container.output()
+
+        self.assertRegex(output, b"usage: mitmproxy", "Container failed for architecture: %s" % platform.machine())
