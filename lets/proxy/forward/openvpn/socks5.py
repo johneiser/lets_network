@@ -24,7 +24,8 @@ class Socks5(Module):
         parser.add_argument("-c", "--ca", type=argparse.FileType("rb"), help="mitm certificate authority (PEM key+cert)")
 
     def handle(self, input, port=8080, interface="0.0.0.0", auth=None, mitm=False, ca=None):
-        
+        assert input is not None, "Must provide OpenVPN configuration as input"
+
         # Retrieve OpenVPN configuration
         for data in input:
 
