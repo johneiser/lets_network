@@ -2,6 +2,15 @@
 Changelog
 =========
 
+1.0.2
+^^^^^
+
+November 14, 2020
+
+- Fixed architecture identification for docker images
+- Added docker image tests per architecture
+
+
 1.0.1
 ^^^^^
 

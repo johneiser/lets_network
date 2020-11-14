@@ -3,7 +3,8 @@ import argparse
 
 # Determine architecture
 import platform
-arm = platform.machine().lower().startswith("arm")
+machine = platform.machine().lower()
+arm = machine.startswith("arm") or machine.startswith("aarch")
 
 
 class Http(Module):

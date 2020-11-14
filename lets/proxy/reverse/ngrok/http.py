@@ -2,7 +2,8 @@ from lets.__module__ import Module, Mount, Container, TestCase
 
 # Determine architecture
 import platform
-arm = platform.machine().lower().startswith("arm")
+machine = platform.machine().lower()
+arm = machine.startswith("arm") or machine.startswith("aarch")
 
 
 class HTTP(Module):
