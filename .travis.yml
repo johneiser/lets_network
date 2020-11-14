@@ -1,0 +1,31 @@
+language: python
+
+matrix:
+  include:
+    - name: "Python 3.5 on Ubuntu 16.04"
+      python: 3.5
+      dist: xenial
+    - name: "Python 3.6 on Ubuntu 16.04"
+      python: 3.6
+      dist: xenial
+    - name: "Python 3.7 on Ubuntu 16.04"
+      python: 3.7
+      dist: xenial
+    - name: "Python 3.8 on Ubuntu 16.04"
+      python: 3.8
+      dist: xenial
+
+branches:
+  only:
+    - main
+
+services:
+  - docker
+
+before_install:
+
+install:
+  - pip install -e .
+
+script:
+  - python test.py

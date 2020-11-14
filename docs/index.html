@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial=scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="https://github.com/favicon.ico">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Tree View -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+    <!-- Resemble ReadTheDocs Format -->
+    <link rel="stylesheet" href="https://lets.readthedocs.io/en/latest/_static/basic.css">
+    <link rel="stylesheet" href="https://lets.readthedocs.io/en/latest/_static/alabaster.css">
+
+  </head>
+  <body>
+    <div class="container">
+
+      <!-- Header -->
+      <div class="pb-2 mt-4 mb-2 border-bottom">
+        <h1>lets</h1>
+        <p><span><a href="https://lets.readthedocs.io/en/latest/index.html">Documentation</a></span> | <span><a href="https://github.com/johneiser/lets_network/">Source</a></span></p>
+      </div>
+
+      <div class="row">
+
+        <!-- Tree -->
+        <div class="p-2 col-md">
+          <input type="text" id="search" class="input" style="width:100%">
+          <div id="tree"></div>
+        </div>
+
+        <!-- Panel -->
+        <div class="p-2 col-md">
+          <pre id="panel" class="bg-white"></pre>
+        </div>
+
+      </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+    <script>
+      $(function () {
+
+        // Tree
+        $('#tree').jstree({
+          'core' : {
+            'data' : {
+              'url' : 'map.json',
+              'data' : function (node) {
+                return { 'id' : node.id };
+              }
+            }
+          },
+          "plugins" : [
+            "search",
+            "types",
+          ],
+          "types" : {
+            "default" : {
+              "icon" : "https://github.com/iconic/open-iconic/raw/master/png/grid-two-up.png",
+              "valid_children" : ["default", "module"]
+            },
+            "module" : {
+              "icon" : "https://github.com/iconic/open-iconic/raw/master/png/document-2x.png",
+              "valid_children" : []
+            }
+          }
+        }).bind("loaded.jstree", function (event, data) {
+          if (window.location.hash) {
+            $('#tree').jstree('select_node', window.location.hash.replace(/\/$/, ""));
+          }
+        });
+        
+        // Search
+        var to = false;
+        $('#search').keyup(function () {
+          if(to) { clearTimeout(to); }
+          to = setTimeout(function () {
+            var v = $('#search').val();
+            $('#tree').jstree(true).search(v);
+          }, 250);
+        });
+
+        // Selection
+        $('#tree').on("changed.jstree", function (e, data) {
+          if (data.node.type == "module") {
+            history.replaceState({}, '', '#' + data.node.id);
+            if (data.node.original.help == undefined) {
+              $('#panel').html(null);
+            } else {            
+              $('#panel').html(data.node.original.help);
+            }
+          }
+        });
+      
+      });
+    </script>
+  </body>
+</html>
