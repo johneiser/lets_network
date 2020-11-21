@@ -7,7 +7,7 @@ class TCP(Module):
     Redirect TLS traffic over TCP.
     """
     images = [
-        "local/socat",      # Cross-platform
+        "local/socat:1.0.0",      # Cross-platform
         ]
 
     @classmethod
@@ -55,7 +55,7 @@ class TCP(Module):
             cmd += " tcp-connect:%s:%i" % (rhost, rport)
 
             # Launch redirector
-            with Container.run("local/socat",
+            with Container.run("local/socat:1.0.0",
                 network="host",     # Use host network to allow local addresses
                 tty=True,
                 stdin_open=True,

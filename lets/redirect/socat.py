@@ -11,7 +11,7 @@ class Socat(Module):
     > lets redirect/socat -- -- -dd -v tcp-listen:4444,fork,reuseaddr tcp-connect:127.0.0.1:4445
     """
     images = [
-        "local/socat",      # Cross-platform
+        "local/socat:1.0.0",      # Cross-platform
         ]
 
     @classmethod
@@ -21,7 +21,7 @@ class Socat(Module):
     def handle(self, input, command=None):
         
         # Launch redirector
-        with Container.run("local/socat",
+        with Container.run("local/socat:1.0.0",
             network="host",     # Use host network to allow local addresses
             tty=True,
             stdin_open=True,
@@ -35,7 +35,7 @@ class Socat(Module):
 
 
 class SocatTestCase(TestCase):
-    images = ["local/socat"]
+    images = ["local/socat:1.0.0"]
 
     def test_images(self):
         """
@@ -44,7 +44,7 @@ class SocatTestCase(TestCase):
         import platform
 
         output = b""
-        image = "local/socat"
+        image = "local/socat:1.0.0"
         with Container.run(image, command="-h") as container:
             output = container.output()
 

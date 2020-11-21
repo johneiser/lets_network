@@ -26,8 +26,9 @@ setup(
     ],
     python_requires = ">=3.5.0",
     install_requires = [
-        "docker-lets>=3.0.3",
+        "docker-lets>=3.0.5",
         "pyopenssl",
+        "scapy",
     ],
     classifiers = [
         "Development Status :: 3 - Alpha",

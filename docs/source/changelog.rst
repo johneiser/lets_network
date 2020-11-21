@@ -2,6 +2,15 @@
 Changelog
 =========
 
+1.0.3
+^^^^^
+
+November 21, 2020
+
+- Added listen/sniff/lan
+- Added version for socat local docker image
+
+
 1.0.2
 ^^^^^
 
