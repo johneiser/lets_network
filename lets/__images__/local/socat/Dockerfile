@@ -1,4 +1,4 @@
-# 1.0.0
-FROM alpine:latest
-RUN apk --no-cache add socat
-ENTRYPOINT ["socat"]
+# local/socat v1.0.1
+FROM debian:latest
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -qy socat 

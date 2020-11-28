@@ -1,16 +1,17 @@
-from lets.__module__ import Module
+from lets.__module__ import Module, IterWriter
 from scapy.all import conf, raw, AsyncSniffer, PcapWriter
 from scapy.error import Scapy_Exception
-from queue import Queue
-import re, io
+import re
 
 
 class LAN(Module):
     """
     Sniff packets on a local area network.
     """
-    queue   = None
-    qfile   = None
+    # Prevent newlines when generating
+    delimiter = b""
+    
+    # Global variables
     pcap    = None
     regex   = None
     xregex  = None
@@ -18,13 +19,14 @@ class LAN(Module):
 
     @classmethod
     def add_arguments(self, parser):
-        parser.add_argument("-n", "--interface", type=str, default=conf.iface, action="append",
-            help="network interface(s) on which to sniff (%(default)s)")
+        parser.add_argument("-n", "--interface", action="append",
+            help="network interface(s) on which to sniff)")
         parser.add_argument("-c", "--count", type=int, default=0,
             help="number of packets to sniff (all)")
         parser.add_argument("-t", "--timeout", type=int, default=None,
             help="number of seconds to sniff (infinite)")
-        parser.add_argument("-f", "--filter", type=str, help="BPF filter to apply")
+        parser.add_argument("-f", "--filter", type=str,
+            help="BPF filter to apply")
         parser.add_argument("-r", "--regex", type=str, action="append", default=[],
             help="expression(s) to qualify packet (AND)")
         parser.add_argument("-x", "--xregex", type=str, action="append", default=[],
@@ -36,56 +38,62 @@ class LAN(Module):
         parser.add_argument("-d", "--debug", action="store_true",
             help="unpack and display each captured packet")
 
-    def handle(self, input, interface=conf.iface, count=0, timeout=None, filter=None, regex=None, xregex=None, monitor=False, pcap=False, debug=False):
+    def handle(self, input, interface=None, count=0, timeout=None, filter=None, regex=None, xregex=None, monitor=False, pcap=False, debug=False):
         self.debug = debug
 
-        # Use queue to route pcap data to output
-        if pcap:
-            self.queue = Queue()
-            self.qfile = QueueFile(self.queue)
-            self.pcap  = PcapWriter(self.qfile)
-
-        # Compile regex and xregex
+        # Compile expressions
         if regex:  self.regex  = [re.compile(r.encode(), re.DOTALL|re.MULTILINE) for r in list(regex)]
         if xregex: self.xregex = [re.compile(x.encode(), re.DOTALL|re.MULTILINE) for x in list(xregex)]
 
-        # Configure sniffer and produce sniffer stream
-        try:
-            stream = AsyncSniffer(
-                started_callback = lambda: self.log.info("Listening on %s...", interface),
-                iface   = interface or conf.iface,
-                count   = count,
-                timeout = timeout,
-                filter  = filter,
-                lfilter = self._lfilter,
-                prn     = self._prn,
-                store   = False,
-                monitor = monitor,
-                )
-            
-            # Start sniffer stream
-            stream.start()
-            
-            # Output pcap data from queue
+        # Output pcap to infinitely iterable file
+        with IterWriter() as output:
             if pcap:
-                while stream.running or not self.queue.empty():
-                    yield self.queue.get()
+                self.pcap = PcapWriter(output, sync=True)
+            
+            # Configure sniffer and produce sniffer stream
+            try:
+                stream = AsyncSniffer(
+                    started_callback = lambda: self.log.info("Sniffing interface(s): %s...", interface or conf.iface),
+                    iface   = interface or conf.iface,
+                    count   = count,
+                    timeout = timeout,
+                    filter  = filter,
+                    lfilter = self._lfilter,
+                    prn     = self._prn,
+                    store   = False,
+                    monitor = monitor,
+                    )
+                
+                # Start sniffer stream
+                stream.start()
+                
+                # Output pcap data
+                if pcap:
+                    for data in output:
+                        yield data
+                        if not stream.running and not output.closed:
+                            output.close()
 
-            # Wait for stream to complete
-            stream.join()
+                # Wait for stream to complete
+                stream.join()
 
-        except Scapy_Exception as e:
-            self.log.error(e)
+            except Scapy_Exception as e:
+                self.log.error(e)
 
     def _prn(self, pkt):
         """
         Handle captured packet.
 
-        :param pkt: captured packet
+        :param object pkt: captured packet
         """
+        # Show packet summary
         self.log.logger.debug(pkt.summary())
+
+        # Show packet details
         if self.debug:
             self.log.logger.info(pkt.show(dump=True))
+
+        # Output full pcap
         if self.pcap:
             self.pcap.write(pkt)
 
@@ -93,11 +101,10 @@ class LAN(Module):
         """
         Assess potential packet for capture.
 
-        :param pkt: potential packet
+        :param object pkt: potential packet
         :return: whether to capture packet
         :rtype: bool
         """
-
         # Check xregex are excluded (OR)
         if self.xregex:
             for x in self.xregex:
@@ -111,17 +118,3 @@ class LAN(Module):
                     return False
 
         return True
-
-
-class QueueFile(io.BytesIO):
-    """
-    Provide a virtual file interface to route file writes across a thread-safe queue.
-    """
-
-    def __init__(self, queue, *args, **kwargs):
-        super(io.BytesIO, self).__init__(*args, **kwargs)
-        self.queue = queue
-
-    def write(self, data):
-        self.queue.put(data)
-

@@ -2,6 +2,15 @@
 Changelog
 =========
 
+1.0.4
+^^^^^
+
+November 27, 2020
+
+- Added tls authentication to redirect/{tls/tcp, tcp/tls}
+- Removed redirect/socat
+
+
 1.0.3
 ^^^^^
 

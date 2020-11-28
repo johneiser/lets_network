@@ -1,15 +1,12 @@
 language: python
+cache:
+    pip: true
 
 matrix:
   include:
     - name: "Python 3.5 on Ubuntu 16.04 amd64"
       python: 3.5
       arch: amd64
-      os: linux
-      dist: xenial
-    - name: "Python 3.5 on Ubuntu 16.04 arm64"
-      python: 3.5
-      arch: arm64
       os: linux
       dist: xenial
     - name: "Python 3.6 on Ubuntu 18.04 amd64"
@@ -27,6 +24,14 @@ matrix:
       arch: amd64
       os: linux
       dist: focal
+    # - name: "Python 3.5 on Mac amd64"
+    #   os: osx
+    #   language: generic
+    - name: "Python 3.5 on Linux arm64"
+      python: 3.5
+      arch: arm64
+      os: linux
+      dist: xenial
 
 branches:
   only:

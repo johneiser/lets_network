@@ -7,7 +7,7 @@ class TCP(Module):
     Redirect TLS traffic over TCP.
     """
     images = [
-        "local/socat:1.0.0",      # Cross-platform
+        "local/socat:1.0.1",      # Cross-platform
         ]
 
     @classmethod
@@ -21,24 +21,33 @@ class TCP(Module):
             help="use TLS key")
         parser.add_argument("-c", "--certificate", type=argparse.FileType("rb"),
             help="use TLS certificate")
+        parser.add_argument("--ca", type=argparse.FileType("rb"),
+            help="use tls certificate authority to verify peer")
 
-    def handle(self, input, lhost, lport, rhost, rport, key=None, certificate=None):
+    def handle(self, input, lhost, lport, rhost, rport, key=None, certificate=None, ca=None):
 
-        with Mount("/certs", "ro") as mount:
+        with Mount("/data", "ro") as mount:
+
+            # Construct command
+            cmd  = "socat"
+            cmd += " openssl-listen:%i,bind=%s,fork,reuseaddr" % (lport, lhost)
+            cmd += ",key=/data/key.pem,cert=/data/cert.pem"
 
             # Write supplied TLS key/certificate
             if key and certificate:
+                self.log.debug("Using key: %s", key.name)
                 with mount.open("key.pem", "wb") as f:
                     f.write(key.read())
+                self.log.debug("Using certificate: %s", certificate.name)
                 with mount.open("cert.pem", "wb") as f:
                     f.write(certificate.read())
             
             # Write generated TLS key/certificate
             else:
                 if key:
-                    self.log.warning("Missing certificate")
+                    self.log.warning("Missing certificate, using self-signed")
                 if certificate:
-                    self.log.warning("Missing key")
+                    self.log.warning("Missing key, using self-signed")
 
                 self.log.debug("Generating self-signed certificate")
                 import lets.generate.tls.certificate
@@ -47,15 +56,20 @@ class TCP(Module):
                     f.write(pem)
                 with mount.open("cert.pem", "wb") as f:
                     f.write(pem)
+            
+            # Write certificate authority
+            if ca:
+                self.log.debug("Verifying peer with certificate: %s", ca.name)
+                with mount.open("ca.pem", "wb") as f:
+                    f.write(ca.read())
+                cmd += ",cafile=/data/ca.pem"
+            else:
+                cmd += ",verify=0"
 
-            # Construct command
-            cmd  = ""
-            cmd += " openssl-listen:%i,bind=%s,fork,reuseaddr" % (lport, lhost)
-            cmd += ",key=/certs/key.pem,cert=/certs/cert.pem,verify=0"
             cmd += " tcp-connect:%s:%i" % (rhost, rport)
 
             # Launch redirector
-            with Container.run("local/socat:1.0.0",
+            with Container.run("local/socat:1.0.1",
                 network="host",     # Use host network to allow local addresses
                 tty=True,
                 stdin_open=True,

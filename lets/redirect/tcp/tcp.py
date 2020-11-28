@@ -7,7 +7,7 @@ class TCP(Module):
     Redirect TCP traffic over TCP.
     """
     images = [
-        "local/socat:1.0.0",      # Cross-platform
+        "local/socat:1.0.1",      # Cross-platform
         ]
 
     @classmethod
@@ -21,12 +21,12 @@ class TCP(Module):
     def handle(self, input, lhost, lport, rhost, rport):
         
         # Construct command
-        cmd  = ""
+        cmd  = "socat"
         cmd += " tcp-listen:%i,bind=%s,fork,reuseaddr" % (lport, lhost)
         cmd += " tcp-connect:%s:%i" % (rhost, rport)
 
         # Launch redirector
-        with Container.run("local/socat:1.0.0",
+        with Container.run("local/socat:1.0.1",
             network="host",     # Use host network to allow local addresses
             tty=True,
             stdin_open=True,

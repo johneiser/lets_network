@@ -26,7 +26,7 @@ setup(
     ],
     python_requires = ">=3.5.0",
     install_requires = [
-        "docker-lets>=3.0.5",
+        "docker-lets>=3.0.6",
         "pyopenssl",
         "scapy",
     ],
@@ -41,8 +41,8 @@ setup(
         "Programming Language :: Python :: 3.7",
     ],
     entry_points = {
-        "console_scripts" : [
-            "lets=lets.__main__:main",
+        "lets" : [
+            "modules=lets:.",
         ],
     }
 )
