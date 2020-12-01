@@ -2,6 +2,15 @@
 Changelog
 =========
 
+1.0.5
+^^^^^
+
+November 30, 2020
+
+- Added __images__/local/termshark
+- Added analyze/pcap/termshark
+
+
 1.0.4
 ^^^^^
 

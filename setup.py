@@ -26,7 +26,7 @@ setup(
     ],
     python_requires = ">=3.5.0",
     install_requires = [
-        "docker-lets>=3.0.6",
+        "docker-lets>=3.0.7",
         "pyopenssl",
         "scapy",
     ],
