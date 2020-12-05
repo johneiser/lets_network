@@ -2,6 +2,17 @@
 Changelog
 =========
 
+1.0.6
+^^^^^
+
+December 5, 2020
+
+- Added __images__/local/dnsmasq
+- Added listen/serve/dns
+- Cleaned up images and added some image tests
+- Moved analyze/pcap/termshark to lets_analyze repository
+
+
 1.0.5
 ^^^^^
 

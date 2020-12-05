@@ -31,8 +31,7 @@ $ pip3 install docker-lets
 Install **lets_network**
 
 ```
-$ git clone https://github.com/johneiser/lets_network
-$ pip3 install ./lets_network
+$ pip3 install git+https://github.com/johneiser/lets_network.git
 ```
 
 Activate **lets** *tab-completion* for bash.

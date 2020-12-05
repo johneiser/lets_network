@@ -1,4 +1,4 @@
-from lets.__module__ import Module, Mount, Container
+from lets.__module__ import Module, Mount, Container, TestCase
 import logging
 
 
@@ -34,3 +34,19 @@ class TCP(Module):
 
             self.log.info("Redirecting TCP(%s:%i) to TCP(%s:%i)", lhost, lport, rhost, rport)
             container.interact()
+
+class TCPTestCase(TestCase):
+    images = ["local/socat:1.0.1"]
+
+    def test_images(self):
+        """
+        Test that required images work on the given architecture.
+        """
+        import platform
+        output = b""
+        image = "local/socat:1.0.1"
+        with Container.run(image, command="socat -h") as container:
+            output = container.output()
+
+        self.assertRegex(output, b"Usage:",
+            "Image (%s) failed for architecture: %s" % (image, platform.machine()))
