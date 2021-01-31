@@ -2,6 +2,15 @@
 Changelog
 =========
 
+1.0.7
+^^^^^
+
+January 31, 2021
+
+- Moved analyze/pcap/termshark back from lets_analyze repository
+- Added listen/serve/{http, postgres}
+
+
 1.0.6
 ^^^^^
 
