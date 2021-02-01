@@ -22,9 +22,11 @@ class TCP(Module):
         parser.add_argument("-c", "--certificate", type=argparse.FileType("rb"),
             help="use TLS certificate")
         parser.add_argument("--ca", type=argparse.FileType("rb"),
-            help="use tls certificate authority to verify peer")
+            help="use TLS certificate authority to verify peer")
+        parser.add_argument("--version", type=str, choices=["tls1", "tls1.1", "tls1.2"],
+            help="use specific TLS version")
 
-    def handle(self, input, lhost, lport, rhost, rport, key=None, certificate=None, ca=None):
+    def handle(self, input, lhost, lport, rhost, rport, key=None, certificate=None, ca=None, version=None):
 
         with Mount("/data", "ro") as mount:
 
@@ -32,6 +34,9 @@ class TCP(Module):
             cmd  = "socat"
             cmd += " openssl-listen:%i,bind=%s,fork,reuseaddr" % (lport, lhost)
             cmd += ",key=/data/key.pem,cert=/data/cert.pem"
+            if version:
+                self.log.debug("Using version: %s", version)
+                cmd += ",method=%s" % version
 
             # Write supplied TLS key/certificate
             if key and certificate:

@@ -2,6 +2,14 @@
 Changelog
 =========
 
+1.0.8
+^^^^^
+
+February 1, 2021
+
+- Added TLS version control to redirect/tls/tcp and redirect/tcp/tls
+
+
 1.0.7
 ^^^^^
 
